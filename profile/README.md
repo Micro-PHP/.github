@@ -5,7 +5,7 @@
 It is a fast, lightweight and highly flexible web application PHP framework.
 
 ## Requirements
-The minimum PHP version must be at least 8.2
+The minimum PHP version must be at least **8.2**
 
 ## Get started
 
