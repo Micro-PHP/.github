@@ -1,5 +1,5 @@
 
-![Logo](https://github.com/Micro-PHP/.github/blob/master/logo/png/logo-color.png?raw=true)
+![Logo](https://github.com/Micro-PHP/.github/blob/master/logo/png/logo-color-for-github-welcome.png?raw=true)
 
 
 # Micro Framework
