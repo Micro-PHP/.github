@@ -2,7 +2,7 @@
 ![Logo](https://github.com/Micro-PHP/.github/blob/master/logo/png/logo-color-for-github-welcome.png?raw=true)
 
 
-# It is a fast, lightweight and highly flexible web application PHP framework.
+It is a fast, lightweight and highly flexible web application PHP framework.
 
 ## Requirements
 The minimum PHP version must be at least 8.2
