@@ -14,9 +14,9 @@ It is recommended that you create your first application in a [docker environmen
 Or you can create an application via [composer](https://getcomposer.org/).
 
 ```bash
-$ composer create-project micro/skeleton {directory} ^1
+$ composer create-project micro/skeleton {directory} --remove-vcs
 $ cd {directory}
-$ php -S localhost:10000 -t public/ 
+$ php -S localhost:10000 -t public/
 ```
 
 Open http://localhost:10000 and you will see HelloWorld page.
