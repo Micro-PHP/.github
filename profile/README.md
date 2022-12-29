@@ -30,10 +30,10 @@ php bin/console
 
 ## Running Tests
 
-To run tests, run the following command
+To run tests, run the following command. By default, phpstan, psalm, phpunit will be runned.
 
 ```bash
-$ php vendor/bin/phpunit
+$ composer run-script test-all
 ``` 
 
 
