@@ -1,0 +1,126 @@
+name: 'Coding Standards'
+
+on:
+  workflow_call:
+    inputs:
+      php-version:
+        description: 'The PHP version to use when running the job'
+        default: '8.2'
+        required: false
+        type: 'string'
+      composer-root-version:
+        description: 'The version of the package being tested, in case of circular dependencies.'
+        required: false
+        type: 'string'
+      composer-options:
+        description: 'Additional flags for the composer install command.'
+        default: '--prefer-dist'
+        required: false
+        type: 'string'
+
+jobs:
+  coding-standards:
+    name: 'Coding Standards'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version:
+          - '${{ inputs.php-version }}'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          coverage: 'none'
+          php-version: '${{ matrix.php-version }}'
+          tools: 'cs2pr'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo 'COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}' >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install Php_Codesniffer with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: 'highest'
+          composer-options: '${{ inputs.composer-options }} --working-dir=vendor/micro/dev-tools/phpcs'
+
+      - name: 'Run PHP_CodeSniffer'
+        run: 'vendor/bin/phpcs -q --no-colors --report=checkstyle | cs2pr'
+
+  mess-detector:
+    name: 'Mess detector'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version:
+          - '${{ inputs.php-version }}'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          coverage: 'none'
+          php-version: '${{ matrix.php-version }}'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo 'COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}' >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install MessDetector with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: 'highest'
+          composer-options: '${{ inputs.composer-options }} --working-dir=vendor/micro/dev-tools/phpmd'
+
+      - name: 'PHP Mess Detector'
+        uses: 'php-actions/phpmd@v1'
+        with:
+          php_version: '${{ matrix.php-version }}'
+          path: 'src/'
+          output: 'github'
+          vendored_phpmd_path: 'vendor/micro/dev-tools/phpmd/vendor/bin/phpmd'
+          # ruleset: test/phpmd/ruleset.xml
+
+  phpcsfixer:
+    name: 'PHP Code Style fixer'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version:
+          - '${{ inputs.php-version }}'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          coverage: 'none'
+          php-version: '${{ matrix.php-version }}'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo 'COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}' >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install PHP Code Style fixer with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: 'highest'
+          composer-options: '${{ inputs.composer-options }} --working-dir=vendor/micro/dev-tools/php-cs-fixer'
+
+      - name: 'PHP Code Style fixer'
+        run: 'vendor/micro/dev-tools/phpmd/vendor/bin/php-cs-fixer fix --verbose --dry-run --using-cache=no'

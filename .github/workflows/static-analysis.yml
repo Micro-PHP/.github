@@ -1,0 +1,86 @@
+name: 'Static Analysis'
+
+on:
+  workflow_call:
+    inputs:
+      php-version:
+        description: 'The PHP version to use when running the job'
+        default: '8.2'
+        required: false
+        type: 'string'
+      composer-root-version:
+        description: 'The version of the package being tested, in case of circular dependencies.'
+        required: false
+        type: 'string'
+      composer-options:
+        description: 'Additional flags for the composer install command.'
+        default: '--prefer-dist'
+        required: false
+        type: 'string'
+
+jobs:
+  phpstan:
+    name: 'PHPStan'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version:
+          - '${{ inputs.php-version }}'
+
+    steps:
+      - name: 'Checkout code'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          coverage: 'none'
+          php-version: '${{ matrix.php-version }}'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo 'COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}' >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install PHPStan with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: 'highest'
+          composer-options: '${{ inputs.composer-options }} --working-dir=vendor/micro/dev-tools/phpstan'
+
+      - name: 'Run a static analysis with phpstan/phpstan'
+        run: 'vendor/bin/phpstan analyse'
+
+  psalm:
+    name: 'Psalm'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version:
+          - '${{ inputs.php-version }}'
+
+    steps:
+      - name: 'Checkout code'
+        uses: 'actions/checkout@v3'
+
+      - name: 'Install PHP'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          coverage: 'none'
+          php-version: '${{ matrix.php-version }}'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo 'COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}' >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install Psalm with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: 'highest'
+          composer-options: '${{ inputs.composer-options }} --working-dir=vendor/micro/dev-tools/psalm'
+
+      - name: 'Run a static analysis with vimeo/psalm'
+        run: 'vendor/bin/psalm --show-info=false --stats --output-format=github --threads=$(nproc)'
