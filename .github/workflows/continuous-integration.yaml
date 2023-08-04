@@ -1,0 +1,70 @@
+name: 'Continuous Integration'
+
+on:
+  workflow_call:
+    inputs:
+      php-versions:
+        description: 'The PHP versions to use when running the job'
+        default: '8.2'
+        required: false
+        type: 'string'
+      composer-root-version:
+        description: 'The version of the package being tested, in case of circular dependencies.'
+        required: false
+        type: 'string'
+      composer-options:
+        description: 'Additional flags for the composer install command.'
+        default: '--prefer-dist'
+        required: false
+        type: 'string'
+
+env:
+  fail-fast: true
+
+jobs:
+  phpunit:
+    name: 'PHPUnit'
+    runs-on: 'ubuntu-22.04'
+
+    strategy:
+      matrix:
+        php-version: '${{ fromJson(inputs.php-versions) }}'
+        dependencies:
+          - 'highest'
+        include:
+          - php-version: '${{ fromJson(inputs.php-versions)[0] }}'
+            dependencies: 'lowest'
+
+    steps:
+      - name: 'Checkout'
+        uses: 'actions/checkout@v3'
+        with:
+          fetch-depth: 2
+
+      - name: 'Install PHP with PCOV'
+        uses: 'shivammathur/setup-php@v2'
+        with:
+          php-version: '${{ matrix.php-version }}'
+          coverage: 'pcov'
+          ini-values: 'zend.assertions=1'
+
+      - name: 'Set COMPOSER_ROOT_VERSION'
+        run: |
+          echo "COMPOSER_ROOT_VERSION=${{ inputs.composer-root-version }}" >> $GITHUB_ENV
+        if: '${{ inputs.composer-root-version }}'
+
+      - name: 'Install dependencies with Composer'
+        uses: 'ramsey/composer-install@v2'
+        with:
+          dependency-versions: '${{ matrix.dependencies }}'
+          composer-options: '${{ inputs.composer-options }}'
+
+      - name: 'Run PHPUnit'
+        run: 'vendor/bin/phpunit --coverage-clover=coverage.xml'
+
+      - name: 'Upload coverage reports to Codecov'
+        run: |
+          # Replace `linux` below with the appropriate OS
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov -t ${CODECOV_TOKEN}
