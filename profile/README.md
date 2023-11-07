@@ -11,7 +11,7 @@ The minimum PHP version must be at least **8.2**
 
 ## Get started
 
-It is recommended that you create your first application in a [Docker environment](https://github.com/Micro-PHP/micro-docker) or in a [Docker RoadRunner environment](https://github.com/Micro-PHP/micro-docker](https://github.com/Micro-PHP/micro-docker-roadrunner)
+It is recommended that you create your first application in a [Docker environment](https://github.com/Micro-PHP/micro-docker) or in a [Docker RoadRunner environment](https://github.com/Micro-PHP/micro-docker-roadrunner)
 
 Or you can create an application via [composer](https://getcomposer.org/).
 
